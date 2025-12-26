@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <style>
+        /* 样式同上，可以自行调整 */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>用户注册</h1>
+        <form id="registerForm">
+            <input type="number" id="admin" placeholder="后台账号" required>
+            <input type="number" id="user" placeholder="注册账号" required>
+            <input type="password" id="password" placeholder="密码" required>
+            <input type="text" id="name" placeholder="昵称" required>
+            <input type="number" id="code" placeholder="验证码（可选）">
+            <input type="text" id="invite_code" placeholder="邀请码（可选）">
+            <input type="text" id="key" placeholder="公钥（可选）">
+            <button type="submit">注册</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 注意：这里使用你部署在Vercel上的后端地址
+        const API_BASE = 'https://tony-beryl.vercel.app/api';
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                admin: document.getElementById('admin').value,
+                user: document.getElementById('user').value,
+                password: document.getElementById('password').value,
+                name: document.getElementById('name').value,
+                code: document.getElementById('code').value || '',
+                invite_code: document.getElementById('invite_code').value || '',
+                key: document.getElementById('key').value || ''
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                // 显示结果
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <div class="result ${result.code === 1 ? 'success' : 'error'}">
+                        <h3>注册结果</h3>
+                        <p>状态码: ${result.code}</p>
+                        <p>消息: ${result.msg}</p>
+                    </div>
+                `;
+
+                if (result.code === 1) {
+                    alert('注册成功！');
+                    this.reset();
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result error">
+                        <h3>请求失败</h3>
+                        <p>${error.message}</p>
+                        <p>请检查网络连接或联系管理员</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
